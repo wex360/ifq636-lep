@@ -1,21 +1,29 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { apiError } from '../apiError';
 
 const Login = () => {
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const { login } = useAuth();
   const navigate = useNavigate();
+  const registered = useLocation().state?.registered;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setBusy(true);
     try {
       const response = await axiosInstance.post('/api/auth/login', formData);
       login(response.data);
-      navigate('/tasks');
+      navigate('/profile');
     } catch (error) {
-      alert('Login failed. Please try again.');
+      setError(apiError(error, 'Login failed. Please try again.'));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -23,6 +31,8 @@ const Login = () => {
     <div className="max-w-md mx-auto mt-20">
       <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded">
         <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
+        {registered && <p role="status" className="mb-4 p-2 bg-green-100 text-green-700 rounded">Account created. Please log in.</p>}
+        {error && <p role="alert" className="mb-4 p-2 bg-red-100 text-red-700 rounded">{error}</p>}
         <input
           type="email"
           placeholder="Email"
@@ -37,7 +47,7 @@ const Login = () => {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           className="w-full mb-4 p-2 border rounded"
         />
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">
+        <button type="submit" disabled={busy} className="disabled:opacity-50 w-full bg-blue-600 text-white p-2 rounded">
           Login
         </button>
       </form>
