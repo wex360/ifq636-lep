@@ -82,3 +82,28 @@ describe('respondRequest', () => {
     expect(res.status.calledWith(409)).to.be.true;
   });
 });
+
+describe('bookSession', () => {
+  const Session = require('../models/Session');
+  const { bookSession } = require('../controllers/sessionController');
+  afterEach(() => sinon.restore());
+
+  it('returns 409 when the partner request is still pending', async () => {
+    const me = id();
+    sinon.stub(PartnerRequest, 'findById').resolves({ from: me, to: id(), status: 'pending' });
+    const create = sinon.stub(Session, 'create');
+    const res = mockRes();
+    await bookSession({ user: { id: me }, body: { requestId: id(), startsAt: '2030-01-01T10:00:00Z', durationMins: 30 } }, res);
+    expect(res.status.calledWith(409)).to.be.true;
+    expect(create.called).to.be.false;
+  });
+
+  it('returns 201 for a participant on an accepted request', async () => {
+    const me = id(); const partner = id();
+    sinon.stub(PartnerRequest, 'findById').resolves({ _id: id(), from: me, to: partner, status: 'accepted' });
+    sinon.stub(Session, 'create').resolves({ status: 'booked' });
+    const res = mockRes();
+    await bookSession({ user: { id: me }, body: { requestId: id(), startsAt: '2030-01-01T10:00:00Z', durationMins: 30 } }, res);
+    expect(res.status.calledWith(201)).to.be.true;
+  });
+});
