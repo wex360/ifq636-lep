@@ -16,6 +16,8 @@ const Navbar = () => {
       <div className="flex items-center">
         {user ? (
           <>
+            <Link to="/partners" className="mr-4">Find partners</Link>
+            <Link to="/requests" className="mr-4">Requests</Link>
             <Link to="/profile" className="mr-4">Profile</Link>
             {user.role === 'moderator' && <span className="mr-4 text-xs bg-white text-blue-700 px-2 py-1 rounded">Moderator</span>}
             <button
