@@ -7,6 +7,7 @@ import Tasks from './pages/Tasks';
 import FindPartners from './pages/FindPartners';
 import Requests from './pages/Requests';
 import Sessions from './pages/Sessions';
+import Moderation from './pages/Moderation';
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/partners" element={<FindPartners />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/sessions" element={<Sessions />} />
+        <Route path="/moderation" element={<Moderation />} />
       </Routes>
     </Router>
   );
