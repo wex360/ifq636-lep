@@ -14,7 +14,7 @@ const registerUser = async (req, res) => {
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
         const user = await User.create({ name, email, password });
-        res.status(201).json({ id: user.id, name: user.name, email: user.email, token: generateToken(user.id) });
+        res.status(201).json({ id: user.id, name: user.name, email: user.email, role: user.role, token: generateToken(user.id) });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -25,7 +25,7 @@ const loginUser = async (req, res) => {
     try {
         const user = await User.findOne({ email });
         if (user && (await bcrypt.compare(password, user.password))) {
-            res.json({ id: user.id, name: user.name, email: user.email, token: generateToken(user.id) });
+            res.json({ id: user.id, name: user.name, email: user.email, role: user.role, token: generateToken(user.id) });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
         }
@@ -46,6 +46,10 @@ const getProfile = async (req, res) => {
         email: user.email,
         university: user.university,
         address: user.address,
+        role: user.role,
+        nativeLanguages: user.nativeLanguages,
+        learningLanguages: user.learningLanguages,
+        bio: user.bio,
       });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
@@ -57,14 +61,19 @@ const updateUserProfile = async (req, res) => {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        const { name, email, university, address } = req.body;
+        const { name, email, university, address, nativeLanguages, learningLanguages, bio } = req.body;
         user.name = name || user.name;
         user.email = email || user.email;
         user.university = university || user.university;
         user.address = address || user.address;
+        // LEP-6: languages are stored trimmed and de-duplicated, case-insensitively
+        const clean = (list) => [...new Map(list.map((l) => [l.trim().toLowerCase(), l.trim()])).values()];
+        if (nativeLanguages) user.nativeLanguages = clean(nativeLanguages);
+        if (learningLanguages) user.learningLanguages = clean(learningLanguages);
+        if (bio !== undefined) user.bio = bio;
 
         const updatedUser = await user.save();
-        res.json({ id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, university: updatedUser.university, address: updatedUser.address, token: generateToken(updatedUser.id) });
+        res.json({ id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, university: updatedUser.university, address: updatedUser.address, role: updatedUser.role, nativeLanguages: updatedUser.nativeLanguages, learningLanguages: updatedUser.learningLanguages, bio: updatedUser.bio, token: generateToken(updatedUser.id) });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
