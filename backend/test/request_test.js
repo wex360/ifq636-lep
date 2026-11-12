@@ -107,3 +107,17 @@ describe('bookSession', () => {
     expect(res.status.calledWith(201)).to.be.true;
   });
 });
+
+describe('moderation setHidden', () => {
+  const { setHidden } = require('../controllers/moderationController');
+  afterEach(() => sinon.restore());
+
+  it('hides a learner profile', async () => {
+    const user = { _id: id(), name: 'Ana', role: 'learner', hidden: false, save: sinon.stub().resolvesThis() };
+    sinon.stub(User, 'findById').resolves(user);
+    const res = mockRes();
+    await setHidden({ params: { id: id() }, body: { hidden: true } }, res);
+    expect(user.hidden).to.equal(true);
+    expect(res.json.calledOnce).to.be.true;
+  });
+});
