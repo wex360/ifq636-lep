@@ -28,6 +28,16 @@ describe('validate middleware', () => {
     const { errors } = res.json.firstCall.args[0];
     expect(Object.keys(errors)).to.have.members(['email', 'password', 'nativeLanguages']);
   });
+
+  it('returns 400 when a profile lists more than 5 languages', () => {
+    const next = sinon.spy();
+    const res = mockRes();
+    const six = ['English', 'Spanish', 'French', 'German', 'Italian', 'Japanese'];
+    rules({ body: { email: 'a@b.co', password: 'longenough', nativeLanguages: six } }, res, next);
+    expect(next.called).to.be.false;
+    expect(res.status.calledWith(400)).to.be.true;
+    expect(res.json.firstCall.args[0].errors.nativeLanguages).to.include('at most 5');
+  });
 });
 
 describe('requireRole middleware', () => {
