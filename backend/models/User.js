@@ -2,12 +2,22 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+const ROLES = ['learner', 'moderator'];
+
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     university: { type: String },
     address: { type: String },
+    // LEP-7: every account is a learner; moderators are promoted by script, never self-assigned
+    role: { type: String, enum: ROLES, default: 'learner' },
+    // LEP-6: language profile used by partner search
+    nativeLanguages: { type: [String], default: [] },
+    learningLanguages: { type: [String], default: [] },
+    bio: { type: String, maxlength: 280 },
+    // LEP-13: a moderator can hide a profile from search
+    hidden: { type: Boolean, default: false },
 });
 
 userSchema.pre('save', async function (next) {
@@ -17,3 +27,4 @@ userSchema.pre('save', async function (next) {
 });
 
 module.exports = mongoose.model('User', userSchema);
+module.exports.ROLES = ROLES;
