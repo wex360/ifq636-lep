@@ -13,14 +13,14 @@ const Navbar = () => {
   return (
     <nav className="bg-blue-600 text-white p-4 flex justify-between items-center">
       <Link to="/" className="text-2xl font-bold">Language Exchange</Link>
-      <div className="flex items-center">
+      <div>
         {user ? (
           <>
             <Link to="/partners" className="mr-4">Find partners</Link>
             <Link to="/requests" className="mr-4">Requests</Link>
             <Link to="/sessions" className="mr-4">Sessions</Link>
             <Link to="/profile" className="mr-4">Profile</Link>
-            {user.role === 'moderator' && <Link to="/moderation" className="mr-4 text-xs bg-white text-blue-700 px-2 py-1 rounded">Moderation</Link>}
+            {user.role === 'moderator' && <Link to="/moderation" className="mr-4">Moderation</Link>}
             <button
               onClick={handleLogout}
               className="bg-red-500 px-4 py-2 rounded hover:bg-red-700"
