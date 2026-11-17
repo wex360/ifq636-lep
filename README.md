@@ -37,5 +37,5 @@ There's no public URL. The unit coordinator said on 3 Nov one isn't needed, so t
 ## Known limitations
 
 - No check for overlapping sessions
-- No notifications, you need to reload to see changes
+- No notifications, so you need to reload to see changes, and a reload logs you out (the starter's login is left as it was)
 - The starter's task feature is still in the API (and its tests), but it isn't linked in the UI
