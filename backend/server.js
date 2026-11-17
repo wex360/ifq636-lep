@@ -17,6 +17,7 @@ const { partners, requests } = require('./routes/requestRoutes');
 app.use('/api/partners', partners);
 app.use('/api/requests', requests);
 app.use('/api/sessions', require('./routes/sessionRoutes'));
+app.use('/api/moderation', require('./routes/moderationRoutes'));
 
 // Export the app object for testing
 if (require.main === module) {
