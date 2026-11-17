@@ -108,6 +108,23 @@ describe('bookSession', () => {
   });
 });
 
+describe('cancelSession', () => {
+  const Session = require('../models/Session');
+  const { cancelSession } = require('../controllers/sessionController');
+  afterEach(() => sinon.restore());
+
+  it('lets a participant cancel a booked session before it starts', async () => {
+    const me = id();
+    const session = { participants: [me, id()], status: 'booked', startsAt: new Date(Date.now() + 3600000), save: sinon.stub().resolvesThis() };
+    sinon.stub(Session, 'findById').resolves(session);
+    const res = mockRes();
+    await cancelSession({ user: { id: me }, params: { id: id() } }, res);
+    expect(session.status).to.equal('cancelled');
+    expect(String(session.cancelledBy)).to.equal(String(me));
+    expect(res.json.calledWith(session)).to.be.true;
+  });
+});
+
 describe('moderation setHidden', () => {
   const { setHidden } = require('../controllers/moderationController');
   afterEach(() => sinon.restore());
