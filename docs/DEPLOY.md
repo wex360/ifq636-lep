@@ -1,11 +1,11 @@
 # Manual deployment to the university EC2 (LEP-14)
 
-One instance runs everything: nginx serves the React build on port 80 and proxies `/api` to the
-Express API on port 5001, which pm2 keeps running. MongoDB is Atlas. No CI/CD: every step below is
-run by hand.
+One server runs everything. nginx serves the React app on port 80 and passes `/api` requests to the
+Express API on port 5001, and pm2 keeps the API running. The database is MongoDB Atlas. Nothing is
+automated, so every step below is done by hand.
 
-Instance: Ubuntu 26.04, t3.medium, 32 GB root volume. Security group: SSH (22) and HTTP (80) from
-My IP only. Per the unit coordinator (3 Nov), no public URL or 0.0.0.0/0 rule is needed.
+Server: Ubuntu 26.04, t3.medium, 32 GB disk. Security group: SSH (22) and HTTP (80) from my IP only.
+The unit coordinator said on 3 Nov we don't need a public URL or a rule open to everyone (0.0.0.0/0).
 
 ## First deployment
 
@@ -28,15 +28,15 @@ My IP only. Per the unit coordinator (3 Nov), no public URL or 0.0.0.0/0 rule is
 10. Check: `curl -i http://localhost/api/partners` returns 401 (API up, login required);
     `http://<public-ip>/` loads the login page from My IP
 
-Atlas accepts connections from any IP, because the instance gets a new IP on every restart. The
-database user and password in `backend/.env` protect it.
+Atlas accepts connections from any IP, because the server gets a new IP every time it restarts.
+The database login in `backend/.env` still protects it.
 
 ## After the instance stops (the midnight stop)
 
 1. Start the instance in the console; note the new public IP
 2. nginx and pm2 start on boot; confirm with `pm2 status` and step 10 above
 
-The frontend calls `/api` relative to the page, so a new IP needs no rebuild.
+The front end calls `/api` on whatever address the page came from, so a new IP doesn't need a rebuild.
 
 ## Releasing a change
 
