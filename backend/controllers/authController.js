@@ -66,17 +66,8 @@ const updateUserProfile = async (req, res) => {
         user.email = email || user.email;
         user.university = university || user.university;
         user.address = address || user.address;
-        // LEP-6: languages are stored trimmed and de-duplicated, case-insensitively
-        const clean = (list) => {
-            const result = [];
-            for (const item of list) {
-                const language = item.trim();
-                if (!result.some((r) => r.toLowerCase() === language.toLowerCase())) result.push(language);
-            }
-            return result;
-        };
-        if (nativeLanguages) user.nativeLanguages = clean(nativeLanguages);
-        if (learningLanguages) user.learningLanguages = clean(learningLanguages);
+        if (nativeLanguages) user.nativeLanguages = nativeLanguages;
+        if (learningLanguages) user.learningLanguages = learningLanguages;
         if (bio !== undefined) user.bio = bio;
 
         const updatedUser = await user.save();
