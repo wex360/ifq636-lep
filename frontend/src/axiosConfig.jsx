@@ -1,8 +1,9 @@
 import axios from 'axios';
 
+// LEP-14: relative base URL. In development the CRA proxy (package.json "proxy") forwards /api to :5001;
+// on EC2 nginx serves the build and proxies /api, so a changed public IP never needs a rebuild.
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5001', // local
-  //baseURL: 'http://3.26.96.188:5001', // live
+  baseURL: '',
   headers: { 'Content-Type': 'application/json' },
 });
 
