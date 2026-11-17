@@ -16,6 +16,7 @@ app.use('/api/tasks', require('./routes/taskRoutes'));
 const { partners, requests } = require('./routes/requestRoutes');
 app.use('/api/partners', partners);
 app.use('/api/requests', requests);
+app.use('/api/sessions', require('./routes/sessionRoutes'));
 
 // Export the app object for testing
 if (require.main === module) {
