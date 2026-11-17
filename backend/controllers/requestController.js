@@ -56,24 +56,27 @@ const listRequests = async (req, res) => {
 };
 
 // LEP-10: PATCH /api/requests/:id { action: accept | decline | cancel }
-const TRANSITIONS = {
-    accept: { by: 'to', status: 'accepted' },
-    decline: { by: 'to', status: 'declined' },
-    cancel: { by: 'from', status: 'cancelled' },
-};
-
 const respondRequest = async (req, res) => {
-    const rule = TRANSITIONS[req.body.action];
+    const action = req.body.action;
     try {
         const request = await PartnerRequest.findById(req.params.id);
         if (!request) return res.status(404).json({ message: 'Request not found' });
-        if (String(request[rule.by]) !== String(req.user.id)) {
-            return res.status(403).json({ message: `Only the ${rule.by === 'to' ? 'recipient' : 'sender'} can ${req.body.action} this request` });
+
+        // Only the recipient can accept or decline, only the sender can cancel
+        if (action === 'accept' || action === 'decline') {
+            if (String(request.to) !== String(req.user.id)) {
+                return res.status(403).json({ message: `Only the recipient can ${action} this request` });
+            }
+        } else if (String(request.from) !== String(req.user.id)) {
+            return res.status(403).json({ message: 'Only the sender can cancel this request' });
         }
         if (request.status !== 'pending') {
             return res.status(409).json({ message: `This request is already ${request.status}` });
         }
-        request.status = rule.status;
+
+        if (action === 'accept') request.status = 'accepted';
+        if (action === 'decline') request.status = 'declined';
+        if (action === 'cancel') request.status = 'cancelled';
         const updated = await request.save();
         res.json(updated);
     } catch (error) {
@@ -81,4 +84,4 @@ const respondRequest = async (req, res) => {
     }
 };
 
-module.exports = { searchPartners, createRequest, listRequests, respondRequest, TRANSITIONS };
+module.exports = { searchPartners, createRequest, listRequests, respondRequest };
