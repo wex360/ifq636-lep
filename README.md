@@ -1,46 +1,41 @@
 # Language Exchange Platform
 
-IFQ636 Assignment 1, built on the unit's MERN starter (`nahaQUT/taskmanagerv1`). Learners find a
-partner who speaks the language they are learning, send a partner request, and book practice sessions
-once it is accepted. Moderators can hide a profile from search.
+IFQ636 Assignment 1. Built on the unit starter (`nahaQUT/taskmanagerv1`).
 
-## Roles and workflows
+Learners find someone who speaks the language they're learning, send them a partner request, and once it's accepted they can book practice sessions. Moderators can hide a profile from search.
 
-- **Learner**: language profile, partner search, requests, sessions
-- **Moderator**: everything a learner can do, plus hide or restore profiles. Promoted by
-  `backend/scripts/makeModerator.js`; the API never lets a user choose their own role
-- **Workflow 1, partner request** (deployed to EC2): search by language, send, accept or decline,
-  cancel. States: pending, accepted, declined, cancelled
-- **Workflow 2, session booking**: book with an accepted partner,
-  cancel before it starts
+## Roles
 
-## Architecture
+- **Learner**: language profile, search for partners, send and answer requests, book and cancel sessions
+- **Moderator**: same as a learner, plus hide or restore profiles. You make someone a moderator with `backend/scripts/makeModerator.js`, so nobody can give themselves the role through the app
 
-React (Create React App, Tailwind) talks to an Express API over `/api`; Mongoose models
-`User`, `PartnerRequest` and `Session` in MongoDB Atlas. On EC2, nginx serves the build and
-proxies `/api` to the API under pm2 (`docs/DEPLOY.md`).
+## Workflows
 
-Design pattern: **Middleware (chain of responsibility)**. Every protected route passes through
-`protect` (JWT), then `requireRole` where a role is needed, then `validate`, before the controller
-runs. Each link either ends the request with 401, 403 or 400, or hands on to the next, so controllers
-only see authenticated, authorised, valid input.
+1. **Partner request** (this is the one on EC2): search by language, send a request, the other person accepts or declines, or the sender cancels it. A request is pending, accepted, declined or cancelled.
+2. **Session booking**: once a request is accepted, either person can book a session, and cancel it before it starts.
 
-## Run locally
+## How it fits together
+
+React front end, Express API, MongoDB Atlas database (Mongoose models `User`, `PartnerRequest`, `Session`). On EC2, nginx serves the React build and sends `/api` requests to the API, which pm2 keeps running.
+
+Design pattern: **Middleware**. Protected routes go through `protect` (logged in?), then `requireRole` (allowed?), then `validate` (is the input ok?) before the controller runs. If a check fails, the request stops there with an error.
+
+## Running it locally
 
 1. Node 22 (`nvm use`)
-2. `npm install --prefix backend && npm install --prefix frontend`
-3. `backend/.env` from `backend/.env.example`
-4. `npm run dev --prefix backend` and, in a second terminal, `npm start --prefix frontend`
+2. `npm install --prefix backend` and `npm install --prefix frontend`
+3. Copy `backend/.env.example` to `backend/.env` and fill it in
+4. `npm run dev --prefix backend`, then in another terminal `npm start --prefix frontend`
 5. Tests: `cd backend && npm test`
-
-## Known limitations
-
-- No public URL: per the unit coordinator's 3 Nov ruling, the EC2 instance is reached from My IP and by
-  the marker through the university account; its IP changes when it restarts (`docs/DEPLOY.md`)
-- Session times have no overlap check
-- No real-time notifications; pages show changes on reload
-- The starter's task feature remains in the API and its tests are kept; it is not linked in the UI
 
 ## Deployment
 
-See `docs/DEPLOY.md`.
+Deployed by hand to the university EC2 instance `i-06c16d4976fcfeafe` (Ubuntu 26.04). Steps are in `docs/DEPLOY.md`.
+
+There's no public URL. The unit coordinator said on 3 Nov one isn't needed, so the instance only accepts my IP, and its IP changes every time it restarts.
+
+## Known limitations
+
+- No check for overlapping sessions
+- No notifications, you need to reload to see changes
+- The starter's task feature is still in the API (and its tests), but it isn't linked in the UI
