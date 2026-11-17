@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { apiError } from '../apiError';
@@ -17,7 +17,7 @@ const FindPartners = () => {
   const [sending, setSending] = useState(null);
   const [rowError, setRowError] = useState({});
 
-  const load = useCallback(async (lang) => {
+  const load = async (lang) => {
     setLoading(true);
     setError('');
     try {
@@ -32,9 +32,11 @@ const FindPartners = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  };
 
-  useEffect(() => { if (user) load(''); }, [user, load]);
+  useEffect(() => {
+    if (user) load('');
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The open or accepted request between me and this learner, either direction
   const statusWith = (id) => requests.find((r) =>
